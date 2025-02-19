@@ -1,18 +1,15 @@
 from flask import Flask, request, jsonify
-import logging
 import mysql.connector
 from mysql.connector import Error
 
 # 导入服务
-from resume_service import ResumeService
-from education_labels_service import EducationLabelsService
-from resume_labeling_service import *
+from service.resume_service import ResumeService
+from service.resume_labeling_service import *
 
 app = Flask(__name__)
 
 # 初始化服务
 resume_service = ResumeService()
-education_labels_service = EducationLabelsService()
 resumeLabelingService = ResumeLabelingService()
 # 设置日志
 logging.basicConfig(level=logging.DEBUG)

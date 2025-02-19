@@ -1,6 +1,6 @@
 import logging
 import os
-import glm
+from utils import glm
 
 # 设置日志
 logging.basicConfig(level=logging.DEBUG)

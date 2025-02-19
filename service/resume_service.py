@@ -1,10 +1,10 @@
 import logging
 import os
-import pandas as pd
 import PyPDF2
-import glm
-from utils import generate_timestamp
 import re
+from datetime import datetime
+
+from utils import glm
 
 # 设置日志
 logging.basicConfig(level=logging.DEBUG)
@@ -61,10 +61,16 @@ class ResumeService:
         return content.strip()
 
     # 保存每个简历部分为单独的txt文件
+    # 保存每个简历部分为单独的txt文件
     def save_resume_to_txt(self, resume_id, resume_parts):
         try:
-            # 创建以时间戳命名的文件夹
-            folder_name = f"resume_{resume_id}"
+            # 创建以时间戳命名的文件夹，并将其放入 resume_list 目录下
+            parent_folder = "resume_list"
+            if not os.path.exists(parent_folder):
+                os.makedirs(parent_folder)
+                logging.info(f"创建文件夹：{parent_folder}")
+
+            folder_name = os.path.join(parent_folder, f"resume_{resume_id}")
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
                 logging.info(f"创建文件夹：{folder_name}")
@@ -128,7 +134,7 @@ class ResumeService:
             resume_parts = self.split_resume_with_glm(extracted_text)
 
             # 生成当前时间戳作为简历号
-            resume_id = generate_timestamp()
+            resume_id = datetime.now().strftime("%Y%m%d%H%M%S")
             logging.info(f"生成的简历ID为：{resume_id}")
 
             # 保存简历内容到txt文件夹中
