@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 import logging
+import mysql.connector
+from mysql.connector import Error
 
 # 导入服务
 from resume_service import ResumeService
@@ -14,6 +16,45 @@ education_labels_service = EducationLabelsService()
 resumeLabelingService = ResumeLabelingService()
 # 设置日志
 logging.basicConfig(level=logging.DEBUG)
+
+# 数据库连接
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='resume',
+            user='root',
+            password='1234'
+        )
+        if connection.is_connected():
+            return connection
+    except Error as e:
+        print(f"Error while connecting to MySQL: {e}")
+        return None
+
+# 插入标签数据
+def insert_resume_and_labels(resume_id, labels, label_type):
+    connection = get_db_connection()
+    if connection is None:
+        return
+
+    cursor = connection.cursor()
+
+    # 插入简历-先不存简历，因为后续简历会有较大变动
+    #cursor.execute('INSERT INTO resumes (resume_id) VALUES (%s)', (resume_id,))
+    #resume_db_id = cursor.lastrowid
+
+    # 插入标签
+    for label in labels:
+        cursor.execute('INSERT INTO labels (label_type, label_value) VALUES (%s, %s)', (label_type, label))
+        label_db_id = cursor.lastrowid
+
+        # 插入简历与标签的关联
+        cursor.execute('INSERT INTO resume_labels (resume_id, label_id) VALUES (%s, %s)', (resume_id, label_db_id))
+
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 @app.route('/upload_resume', methods=['POST'])
 def upload_resume():
@@ -46,6 +87,9 @@ def get_basic_labels():
         # 使用 BasicLabelsService 获取基本信息标签
         result = resumeLabelingService.get_basic_labels(resume_id)
 
+        # 存储标签到数据库
+        insert_resume_and_labels(resume_id, result['labels'], 'basic')
+
         # 返回结果
         return jsonify(result), 200
 
@@ -65,6 +109,9 @@ def get_education_labels():
 
         # 使用 EducationLabelsService 获取教育经历标签
         result = resumeLabelingService.get_education_labels(resume_id)
+
+        # 存储标签到数据库
+        insert_resume_and_labels(resume_id, result['labels'], 'education')
 
         # 返回结果
         return jsonify(result), 200
@@ -86,6 +133,9 @@ def get_skills_labels():
         # 使用 SkillsLabelsService 获取技能标签
         result = resumeLabelingService.get_skills_labels(resume_id)
 
+        # 存储标签到数据库
+        insert_resume_and_labels(resume_id, result['labels'], 'skills')
+
         # 返回结果
         return jsonify(result), 200
 
@@ -105,6 +155,9 @@ def get_work_experience_labels():
 
         # 使用 WorkExperienceLabelsService 获取工作经历标签
         result = resumeLabelingService.get_work_experience_labels(resume_id)
+
+        # 存储标签到数据库
+        insert_resume_and_labels(resume_id, result['labels'], 'work_experience')
 
         # 返回结果
         return jsonify(result), 200
