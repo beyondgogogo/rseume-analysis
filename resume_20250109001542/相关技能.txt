@@ -1,0 +1,6 @@
+相关技能
+Java：熟悉 Java 基础，Java 多线程、JVM 以及 Springboot 架构等。
+Python：熟悉 Python 的基础语法以及基本数据结构，熟悉常规 Python 包的使用。
+数据库：熟悉 MySQL 数据库的索引、事务、锁等，熟悉基础 SQL 的使用。
+计算机基础：熟悉常用的数据结构与算法；熟悉 HTTP、TCP、UDP 等协议。
+开发工具：熟悉 Linux 操作系统和 Git 版本控制工具等。
